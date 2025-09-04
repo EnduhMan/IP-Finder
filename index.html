@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IP Finder</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 40px 60px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .ip-display {
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+    .ip-display p {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #555;
+      margin: 5px 0;
+    }
+    .ip-type {
+      font-size: 0.9em;
+      color: #777;
+    }
+    .section {
+      margin-top: 25px;
+      padding-top: 25px;
+      border-top: 1px solid #eee;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #cookie-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      transition: transform 0.3s ease-in-out;
+      transform: translateY(100%);
+      z-index: 1000;
+    }
+    #cookie-banner.show {
+      transform: translateY(0);
+    }
+    #cookie-banner button {
+      background-color: #28a745;
+      margin-left: 15px;
+    }
+    #cookie-banner button:hover {
+      background-color: #218838;
+    }
+    #decline-button {
+      background-color: #dc3545;
+    }
+    #decline-button:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Your IP Address</h2>
+    <div class="ip-display">
+      <p id="ipv4-ip">Loading IPv4...</p>
+      <p id="ipv6-ip">Loading IPv6...</p>
+    </div>
+
+    <div class="section">
+      <p>Is This The Correct IP?</p>
+      <button onclick="alert('You clicked YES')">YES</button>
+      <button onclick="alert('You clicked NO')">NO</button>
+    </div>
+  </div>
+
+  <div id="cookie-banner">
+    <p>Do You Want To Accept Cookies?</p>
+    <small>This allows the website to store your IP for possibly improving the website.</small><br>
+    <button onclick="acceptCookies()">Accept Cookies</button>
+    <button id="decline-button" onclick="declineCookies()">Decline Cookies</button>
+  </div>
+
+  <script>
+    let ipv4 = null;
+    let ipv6 = null;
+
+    // Fetch IPv4 address
+    fetch("https://api.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => {
+        ipv4 = data.ip;
+        document.getElementById("ipv4-ip").textContent = `IPv4: ${ipv4}`;
+      })
+      .catch(() => {
+        document.getElementById("ipv4-ip").textContent = "Could not fetch IPv4.";
+      });
+
+    // Fetch IPv6 address
+    fetch("https://api64.ipify.org?format=json")
+      .then(response => response.json())
+      .then(data => {
+        ipv6 = data.ip;
+        document.getElementById("ipv6-ip").textContent = `IPv6: ${ipv6}`;
+      })
+      .catch(() => {
+        document.getElementById("ipv6-ip").textContent = "Could not fetch IPv6.";
+      });
+      
+    function acceptCookies() {
+      // Send both IPs to the server if they were fetched
+      if (ipv4) {
+        fetch("/log-ip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ip: ipv4 }),
+        });
+      }
+      if (ipv6) {
+        fetch("/log-ip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ip: ipv6 }),
+        });
+      }
+      
+      // Hide the banner
+      document.getElementById("cookie-banner").classList.remove("show");
+    }
+
+    function declineCookies() {
+      // Hide the banner without sending any data
+      document.getElementById("cookie-banner").classList.remove("show");
+    }
+
+    // Show cookie banner after a short delay
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById("cookie-banner").classList.add("show");
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
