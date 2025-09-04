@@ -140,14 +140,14 @@
     function acceptCookies() {
       // Send both IPs to the server if they were fetched
       if (ipv4) {
-        fetch("/log-ip", {
+        fetch("https://ip-finder-club.onrender.com/log-ip", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ip: ipv4 }),
         });
       }
       if (ipv6) {
-        fetch("/log-ip", {
+        fetch("https://ip-finder-club.onrender.com/log-ip", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ip: ipv6 }),
